@@ -1,0 +1,10 @@
+PyJWT
+discord.py
+pyrebase
+python-dotenv
+humanfriendly
+requests
+genshin
+pytz
+translate
+requests

@@ -1,0 +1,7 @@
+cards
+.env
+.vscode
+cogs/__pycache__
+g.py
+p.py
+cogs/initpull.py
