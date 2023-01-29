@@ -12,11 +12,11 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 intents = discord.Intents.all()
 intents.members = True
 intents.presences = True
-bot = commands.Bot(command_prefix= ".", intents=intents, help_command=None, application_id='1007934486815723520') #production: 1007934486815723520 #dev: 1053527619724902461
+bot = commands.Bot(command_prefix= "!", intents=intents, help_command=None, application_id='1007934486815723520', case_insensitive=True) #production: 1007934486815723520 #dev: 1053527619724902461
 
 async def load():
     for filename in os.listdir('./cogs'):
-        # if filename.endswith('registeralt.py') or filename.endswith('register.py'):
+        # if filename.endswith('registeralt.py') or filename.endswith('register.py') or filename.endswith('notes.py') or filename.endswith('set.py'):
         if filename.endswith('.py'):
             await bot.load_extension(f'cogs.{filename[:-3]}')
 

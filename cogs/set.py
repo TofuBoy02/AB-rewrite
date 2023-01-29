@@ -69,6 +69,26 @@ class SelectAccGenEdit(discord.ui.Select):
         data = {"uid": int(self.values[0])}
         database.child("boon").child("notes").child("users").child(interaction.user.id).update(data)
 
+class SelectAccGenEditAlt(discord.ui.Select):
+    def __init__(self, genshinUIDs, name):
+        self.genshinUIDs = genshinUIDs
+        self.name = name
+        option_list = []
+        if self.genshinUIDs:
+            for uid in self.genshinUIDs:
+                option_list.append(discord.SelectOption(label=f"{uid}"))
+        elif not self.genshinUIDs:
+            option_list.append(discord.SelectOption(label=f"You have no Genshin Accounts"))
+        options = option_list
+        super().__init__(placeholder="Select a Genshin UID", max_values=1, min_values=1, options=options)
+    async def callback(self, interaction: discord.Interaction):
+        if self.values[0] == "You have no Genshin Accounts":
+            await interaction.response.send_message("Stop trying bitch", ephemeral=True)
+            return
+        await interaction.response.send_message(f"Successfully set your alt account \"{self.name}\" UID to {self.values[0]}. Your Daily check-in for Genshin will be automatically be claimed, and you can check your resin amount using `.n`", ephemeral=True)
+        data = {"uid": int(self.values[0])}
+        database.child("boon").child("notes").child("users").child(interaction.user.id).child("alts").child(self.name).update(data)
+
 class SelectAccHonEdit(discord.ui.Select):
     def __init__(self, honkaiUIDs):
         self.honkaiUIDs = honkaiUIDs
@@ -92,6 +112,11 @@ class SelectAccGenViewEdit(discord.ui.View):
     def __init__(self, *, timeout=100, genshinUIDs):
         super().__init__(timeout=timeout)
         self.add_item(SelectAccGenEdit(genshinUIDs))
+
+class SelectAccGenViewEditAlt(discord.ui.View):
+    def __init__(self, *, timeout=100, genshinUIDs, name):
+        super().__init__(timeout=timeout)
+        self.add_item(SelectAccGenEditAlt(genshinUIDs, name))
 
 class SelectAccHonViewEdit(discord.ui.View):
     def __init__(self, *, timeout=100, honkaiUIDs):
@@ -178,6 +203,27 @@ class setTZ(commands.GroupCog, name="set"):
             print(e)
             await interaction.followup.send("Something went wrong idk")
 
+    @app_commands.command(name="altuid", description="Change your selected alt Genshin UID.")
+    async def setAltGenUID(self, interaction: discord.Interaction, name:str):
+        genshinUIDs = []
+        await interaction.response.defer(ephemeral=True)
+        try:
+            if database.child("boon").child("notes").child("users").child(interaction.user.id).child("alts").child(name).get().val():
+                user_data = database.child("boon").child("notes").child("users").child(interaction.user.id).child("alts").child(name).get().val()
+                ltuid = user_data["ltuid"]
+                ltoken = user_data["ltoken"]
+                gc = genshin.Client(f"ltoken={ltoken}; ltuid={ltuid}")
+                gameAccounts = await gc.get_game_accounts()
+                for accounts in gameAccounts:
+                    if str(accounts.game_biz) == "hk4e_global":
+                        genshinUIDs.append(accounts.uid)
+                await interaction.followup.send(view=SelectAccGenViewEditAlt(genshinUIDs = genshinUIDs, name=name))
+            else:
+                await interaction.followup.send("I can't find this alt account. Please make sure to input an existing alt account name.")
+        except Exception as e:
+            print(e)
+            await interaction.followup.send("Something went wrong idk")
+
     @app_commands.command(name="honkai3uid", description="Change your selected Honkai UID.")
     async def setHonUID(self, interaction: discord.Interaction):
         honkaiUIDs = []
@@ -205,3 +251,6 @@ class setTZ(commands.GroupCog, name="set"):
 
 async def setup(bot):
     await bot.add_cog(setTZ(bot))
+
+# async def setup(bot):
+#     await bot.add_cog(setTZ(bot), guilds=[discord.Object(id=980092176488886383)])

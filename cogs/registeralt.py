@@ -41,14 +41,6 @@ config = {
 firebase = pyrebase.initialize_app(config)
 database = firebase.database()
 
-class SameAccountButtonTryAgain(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=100)
-    
-    @discord.ui.button(label="Try again", style=discord.ButtonStyle.blurple)
-    async def registerbutton(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_modal(registerAltModal())
-
 class uidSelect(discord.ui.Select):
     def __init__(self, altname, ltoken, ltuid, cookie, genshinUIDs):
         self.altname = altname
@@ -72,7 +64,6 @@ class uidSelect(discord.ui.Select):
             await interaction.response.defer(ephemeral=True)
             data = {"ltoken": self.ltoken, "ltuid": int(self.ltuid), "cookie_token": self.cookie, "uid": int(self.values[0])}
             database.child("boon").child("notes").child("users").child(interaction.user.id).child("alts").child(self.altname).update(data)
-            database.child("boon").child("notes").child("users").child(interaction.user.id).update(data)
             await interaction.followup.send(content = f"Successfully set your Genshin UID to {self.values[0]}. Your Daily check-in for Genshin will be automatically be claimed, and you can check your resin amount using `.n`", ephemeral=True)
 
 class uidSelectView(discord.ui.View):
@@ -101,7 +92,7 @@ class registerAltModal(discord.ui.Modal, title="Registration"):
         except Exception as e:
             print(e)
             embed = discord.Embed(title="Error", description="Something went wrong. Please make sure you input the correct information", color=3092790)
-            await interaction.edit_original_response(content="", embed=embed, view=SameAccountButtonTryAgain())
+            await interaction.edit_original_response(content="", embed=embed)
 
 
 class registerAlt(commands.Cog):
