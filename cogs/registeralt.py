@@ -94,6 +94,28 @@ class registerAltModal(discord.ui.Modal, title="Registration"):
             embed = discord.Embed(title="Error", description="Something went wrong. Please make sure you input the correct information", color=3092790)
             await interaction.edit_original_response(content="", embed=embed)
 
+class buttonRegister(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=100)
+    
+    @discord.ui.button(label="Register", style=discord.ButtonStyle.blurple)
+    async def registerbutton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(registerAltModal())
+    
+    @discord.ui.button(label="PC Script", style=discord.ButtonStyle.gray, emoji="💻")
+    async def scriptbutton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        embed2 = discord.Embed(description="```js\nscript:check = document.cookie.includes('account_id') && document.cookie.includes('cookie_token') || alert('Please logout and log back in before trying again, cookie expired.'); a=document.cookie.match(/(ltoken)=(.*?);/gm); b=document.cookie.match(/(ltuid)=(.*?);/gm); c=document.cookie.match(/(cookie_token)=(.*?);/gm); check && document.write(`<br><br><button onclick=\"navigator.clipboard.writeText('${a}')\">Copy ltoken</button><br><br><button onclick=\"navigator.clipboard.writeText('${b}'); \">Copy ltuid</button><br><br><button onclick=\"navigator.clipboard.writeText('${c}')\">Copy cookie_token</button>`)```")
+        await interaction.response.send_message(embed=embed2, ephemeral=True)
+
+    @discord.ui.button(label="Mobile Script", style=discord.ButtonStyle.gray, emoji="📱")
+    async def scriptbuttonmobile(self, interaction: discord.Interaction, button: discord.ui.Button):
+        embed2 = discord.Embed(description="script:check = document.cookie.includes('account_id') && document.cookie.includes('cookie_token') || alert('Please logout and log back in before trying again, cookie expired.'); a=document.cookie.match(/(ltoken)=(.*?);/gm); b=document.cookie.match(/(ltuid)=(.*?);/gm); c=document.cookie.match(/(cookie_token)=(.*?);/gm); check && document.write(`<br><br><button onclick=\"navigator.clipboard.writeText('${a}')\">Copy ltoken</button><br><br><button onclick=\"navigator.clipboard.writeText('${b}'); \">Copy ltuid</button><br><br><button onclick=\"navigator.clipboard.writeText('${c}')\">Copy cookie_token</button>`)")
+        await interaction.response.send_message(embed=embed2, ephemeral=True)
+
+    @discord.ui.button(label="Video Tutorial", style=discord.ButtonStyle.gray, emoji="🎥")
+    async def video(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("https://media.discordapp.net/attachments/1038687174654173184/1056956420601434142/Screen_Recording_20221226-232300_Discord.mp4", ephemeral=True)
+
 
 class registerAlt(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -111,12 +133,14 @@ class registerAlt(commands.Cog):
                 embed = discord.Embed(title="Error", description="You don't have a main account registered. Please register normally using </register:1056948453118328892> instead.", color=3092790)
                 await interaction.response.send_message(embed=embed)
             else:
-                await interaction.response.send_modal(registerAltModal())
+                embed = discord.Embed(title="BoonBot Genshin HoYoLAB Registration", description="**1.** Go to HoYoLAB's website and log in.\n**2.** Type `java` on the url bar and then paste the script from below.\n **3.** Click the Register button in this message.\n**4.** One by one, copy and paste each field.", color=3092790)
+                await interaction.response.send_message(content="", embed=embed, view=buttonRegister(), ephemeral=True)
+                # await interaction.response.send_modal(registerAltModal())
         except Exception as e:
             print(e)
             
-# async def setup(bot):
-#     await bot.add_cog(registerAlt(bot))
-
 async def setup(bot):
-    await bot.add_cog(registerAlt(bot), guilds=[discord.Object(id=980092176488886383)])
+    await bot.add_cog(registerAlt(bot))
+
+# async def setup(bot):
+#     await bot.add_cog(registerAlt(bot), guilds=[discord.Object(id=980092176488886383)])
