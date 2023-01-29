@@ -282,27 +282,8 @@ class notes(commands.Cog):
                         value=f"**Days Active:** {genshin_stats.stats.days_active}\n**Characters:**{genshin_stats.stats.characters}\n<:anemoculus:1037646266185818152> {genshin_stats.stats.anemoculi} <:geoculus:1037646330895552552> {genshin_stats.stats.geoculi} <:electroculus:1037646373618733138> {genshin_stats.stats.electroculi} <:dendroculus:1037646414689345537> {genshin_stats.stats.dendroculi}\n<:common_chest:1037649653145030697> {genshin_stats.stats.common_chests} <:exquisite_chest:1037649650645217341> {genshin_stats.stats.exquisite_chests} <:precious_chest:1037649648602591362>  {genshin_stats.stats.precious_chests}\n<:Luxurious_chest:1037649646677401660>  {genshin_stats.stats.luxurious_chests} <:remarkable_chest:1037649644748029994> {genshin_stats.stats.remarkable_chests} <:waypoint:1037650848349683782> {genshin_stats.stats.unlocked_waypoints} <:domain:1037650846277709854> {genshin_stats.stats.unlocked_domains}",
                         inline=True)
                     
-                    if not database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val():
-                        if not database.child("boon").child("notes").child("reminders").child(ctx.author.id).get().val():
-                            if notes.remaining_resin_recovery_time.seconds > 600:
-                                await reply.edit(content="", embed=embed, view=buttonRemind(author=ctx.author.id, time=notes.remaining_resin_recovery_time.seconds))
-                            elif notes.remaining_resin_recovery_time.seconds <= 600:
-                                await reply.edit(content="", embed=embed)
-                        else:
-                            await reply.edit(content="", embed=embed, view=removeRemind(author=ctx.author.id))
-
-                    elif database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val():
-                        user_settings = database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val()
-                        if user_settings["show_note_buttons"] == True:
-                            if not database.child("boon").child("notes").child("reminders").child(ctx.author.id).get().val():
-                                if notes.remaining_resin_recovery_time.seconds > 600:
-                                    await reply.edit(content="", embed=embed, view=buttonRemind(author=ctx.author.id, time=notes.remaining_resin_recovery_time.seconds))
-                                elif notes.remaining_resin_recovery_time.seconds <= 600:
-                                    await reply.edit(content="", embed=embed)
-                            else:
-                                await reply.edit(content="", embed=embed, view=removeRemind(author=ctx.author.id))
-                        elif user_settings["show_note_buttons"] == False:
-                            await reply.edit(content="", embed=embed)
+        
+                    await reply.edit(content="", embed=embed)
 
                 elif database.child("boon").child("notes").child("users").child(ctx.author.id).child("alts").get().val():
                     alt_names = ""
