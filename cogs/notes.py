@@ -134,7 +134,7 @@ class notes(commands.Cog):
 
                     try:
                         
-                        url = f"https://enka.shinshin.moe/u/{uid}/__data.json"
+                        url = f"https://dev.enka.network/api/uid/{uid}"
                         request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
                         webpage = urlopen(request_site).read()
                         output = json.loads(webpage.decode('utf-8'))
@@ -244,7 +244,7 @@ class notes(commands.Cog):
 
                     try:
                         
-                        url = f"https://enka.shinshin.moe/u/{uid}/__data.json"
+                        url = f"https://dev.enka.network/api/uid/{uid}"
                         request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
                         webpage = urlopen(request_site).read()
                         output = json.loads(webpage.decode('utf-8'))
