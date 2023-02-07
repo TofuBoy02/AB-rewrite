@@ -134,7 +134,8 @@ class notes(commands.Cog):
 
                     try:
                         
-                        url = f"https://dev.enka.network/api/uid/{uid}"
+                        url = f"https://enka.network/api/uid/{uid}"
+                        print(url)
                         request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
                         webpage = urlopen(request_site).read()
                         output = json.loads(webpage.decode('utf-8'))
@@ -147,6 +148,7 @@ class notes(commands.Cog):
                     except Exception as e:
                         print(e)
                         output = None
+                        return
 
                     try:
                         signature = f"\"{output['playerInfo']['signature']}\""
@@ -244,7 +246,7 @@ class notes(commands.Cog):
 
                     try:
                         
-                        url = f"https://dev.enka.network/api/uid/{uid}"
+                        url = f"https://enka.network/api/uid/{uid}"
                         request_site = Request(url, headers={"User-Agent": "Mozilla/5.0"})
                         webpage = urlopen(request_site).read()
                         output = json.loads(webpage.decode('utf-8'))
