@@ -62,7 +62,7 @@ class oculuslb(commands.Cog):
                 rank += 1
             
             
-            embed = discord.Embed(title="Oculus Leaderboard", description=f"{users}", color=3092790)
+            embed = discord.Embed(title="<:dendroculus:1037646414689345537> Oculus Leaderboard", description=f"{users}", color=3092790)
             await ctx.reply(embed=embed)
 
                 
