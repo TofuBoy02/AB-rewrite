@@ -8,3 +8,5 @@ genshin
 pytz
 translate
 requests
+# fuzzywuzzy
+# python-Levenshtein
