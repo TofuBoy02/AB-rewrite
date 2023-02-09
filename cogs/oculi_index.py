@@ -39,7 +39,7 @@ firebase = pyrebase.initialize_app(config)
 database = firebase.database()
 
 
-class pulladd(commands.Cog):
+class oculiUpdate(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.oculi_update.start()
@@ -104,4 +104,4 @@ class pulladd(commands.Cog):
         await self.bot.wait_until_ready()
         
 async def setup(bot):
-    await bot.add_cog(pulladd(bot))
+    await bot.add_cog(oculiUpdate(bot))
