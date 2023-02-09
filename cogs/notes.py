@@ -11,6 +11,7 @@ import datetime
 from urllib.request import Request, urlopen
 import time
 import json
+from collections import OrderedDict
 
 TOKEN = os.getenv('TOKEN')
 
@@ -82,7 +83,7 @@ class buttonRemind(discord.ui.View):
             await interaction.response.send_message(f"Okay, I'll check your resin in {human_time} and tell you if it's almost capped! You can still use you resin, and I'll readjust my timer accordingly~")
 
 
-class notes(commands.Cog):
+class notesClass(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -93,10 +94,27 @@ class notes(commands.Cog):
     async def on_error(self, error):
         print(error)
 
+    def get_rank(sorted_data, user):
+        user_str = str(user)
+        rank = 1
+        for key in sorted_data.keys():
+            if key == user_str:
+                break
+            rank += 1
+        return rank
+
+    def get_lb(user):
+        data = database.child("boon").child("notes").child("lb").get().val()
+        sorted_data = OrderedDict(sorted(data.items(), key=lambda x: x[1]['total'], reverse=True))
+        rank = notesClass.get_rank(sorted_data = sorted_data, user = user)
+        number_of_users = len(data)
+        return {"rank": rank, "users": number_of_users}
+
     @commands.command()
     async def n(self,ctx, alt=None):
         if alt is None:
             try:
+                print("test")
                 if database.child("boon").child("notes").child("users").child(ctx.author.id).get().val():
                     user = database.child("boon").child("notes").child("users").child(ctx.author.id).get().val()
                     ltuid = user["ltuid"]
@@ -104,6 +122,9 @@ class notes(commands.Cog):
                     gc = genshin.Client(f"ltoken={ltoken}; ltuid={ltuid}")
                     uid = user["uid"]
                     name = ctx.author.name
+                    ranking_data = notesClass.get_lb(user = ctx.author.id)
+                    oculi_rank = ranking_data["rank"]
+                    oculi_lb_length = ranking_data["users"]
                     
                     reply = await ctx.reply("Fetching data...")
                     notes = await gc.get_genshin_notes(uid)
@@ -171,8 +192,12 @@ class notes(commands.Cog):
                     genshin_stats = await gc.get_genshin_user(uid)
                     embed.add_field(
                         name="Stats",
-                        value=f"**Days Active:** {genshin_stats.stats.days_active}\n**Characters:**{genshin_stats.stats.characters}\n<:anemoculus:1037646266185818152> {genshin_stats.stats.anemoculi} <:geoculus:1037646330895552552> {genshin_stats.stats.geoculi} <:electroculus:1037646373618733138> {genshin_stats.stats.electroculi} <:dendroculus:1037646414689345537> {genshin_stats.stats.dendroculi}\n<:common_chest:1037649653145030697> {genshin_stats.stats.common_chests} <:exquisite_chest:1037649650645217341> {genshin_stats.stats.exquisite_chests} <:precious_chest:1037649648602591362>  {genshin_stats.stats.precious_chests}\n<:Luxurious_chest:1037649646677401660>  {genshin_stats.stats.luxurious_chests} <:remarkable_chest:1037649644748029994> {genshin_stats.stats.remarkable_chests} <:waypoint:1037650848349683782> {genshin_stats.stats.unlocked_waypoints} <:domain:1037650846277709854> {genshin_stats.stats.unlocked_domains}",
+                        value=f"**Days Active:** {genshin_stats.stats.days_active}\n**Characters:**{genshin_stats.stats.characters}\n<:anemoculus:1037646266185818152> {genshin_stats.stats.anemoculi} <:geoculus:1037646330895552552> {genshin_stats.stats.geoculi} <:electroculus:1037646373618733138> {genshin_stats.stats.electroculi} <:dendroculus:1037646414689345537> {genshin_stats.stats.dendroculi}\n<:common_chest:1037649653145030697> {genshin_stats.stats.common_chests} <:exquisite_chest:1037649650645217341> {genshin_stats.stats.exquisite_chests} <:precious_chest:1037649648602591362>  {genshin_stats.stats.precious_chests}\n<:Luxurious_chest:1037649646677401660>  {genshin_stats.stats.luxurious_chests} <:remarkable_chest:1037649644748029994> {genshin_stats.stats.remarkable_chests} <:waypoint:1037650848349683782> {genshin_stats.stats.unlocked_waypoints} <:domain:1037650846277709854> {genshin_stats.stats.unlocked_domains}\n**Oculus Ranking:** #{oculi_rank} out of {oculi_lb_length}",
                         inline=True)
+                    embed.add_field(
+                        name="New!",
+                        value=f"Oculi Leaderboard Command: `.oclb`",
+                        inline=False)
                     
                     if not database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val():
                         if not database.child("boon").child("notes").child("reminders").child(ctx.author.id).get().val():
@@ -196,16 +221,22 @@ class notes(commands.Cog):
                         elif user_settings["show_note_buttons"] == False:
                             await reply.edit(content="", embed=embed)
 
-
-                    
-                    
-
-                    
                 elif not database.child("boon").child("notes").child("users").child(ctx.author.id).get().val():
                     await ctx.reply("Your Discord ID is not linked to a Boon notes account. Please register using </register:1056894402548736060>")
             except Exception as e:
                 print(e)
                 await ctx.reply(f"An error occured. Please ping tofu.\n`{e}`")
+
+            ##### Update oculi index #####
+            try:
+                data = {"anemoculi": genshin_stats.stats.anemoculi,
+                        "geoculi": genshin_stats.stats.geoculi,
+                        "electroculi": genshin_stats.stats.electroculi,
+                        "dendroculi": genshin_stats.stats.dendroculi,
+                        "total": genshin_stats.stats.anemoculi + genshin_stats.stats.geoculi + genshin_stats.stats.electroculi + genshin_stats.stats.dendroculi}
+                database.child("boon").child("notes").child("lb").child(ctx.author.id).update(data)
+            except:
+                print("Could not update oculi data")
         
         elif alt is not None:
             try:
@@ -264,6 +295,9 @@ class notes(commands.Cog):
                         signature = f"\"{output['playerInfo']['signature']}\""
                     except:
                         signature = "None"
+
+                    ####### OCULUS RANKING #######
+                    
 
                     embed = discord.Embed(
                         title=f"{output['playerInfo']['nickname']}'s Live Notes",
@@ -349,10 +383,6 @@ class notes(commands.Cog):
 
         except Exception as e:
             await ctx.reply(f"An error occured. Please ping tofu.\n`{e}`")
-
-
-
-
         
 async def setup(bot):
-    await bot.add_cog(notes(bot))
+    await bot.add_cog(notesClass(bot))

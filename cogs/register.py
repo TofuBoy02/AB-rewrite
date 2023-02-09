@@ -58,7 +58,8 @@ class SelectAccGen(discord.ui.Select):
         if self.values[0] == "You have no Genshin Accounts":
             await interaction.response.send_message("Stop trying bitch", ephemeral=True)
             return
-        await interaction.response.send_message(f"Successfully set your Genshin UID to {self.values[0]}. Your Daily check-in for Genshin will be automatically be claimed, and you can check your resin amount using `.n`", ephemeral=True)
+        embed = discord.Embed(title="Success", description=f"Successfully set your Genshin UID to {self.values[0]}. Your Daily check-in for Genshin will be automatically be claimed, and you can check your resin amount using `.n`\n\n**Note:** When you use Live notes command (`.n`) for the first time, your oculi ranking may be incorrect.", color=3092790)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
         data = {"uid": int(self.values[0])}
         database.child("boon").child("notes").child("users").child(interaction.user.id).update(data)
 
