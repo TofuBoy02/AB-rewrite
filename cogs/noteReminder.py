@@ -82,7 +82,7 @@ class resinReminder(commands.Cog):
                             
                             embed = discord.Embed(title=f"{uid_to_user}'s Resin Status", description=f"<:resin:950411358569136178> {current_resin}/{max_resin}", color=3092790)
 
-                            await channel.send(f"<@{reminder}>! Your resin is almost capped!", embed=embed)
+                            await channel.send(f"<@{reminder}>! Resin alert", embed=embed)
                             database.child("boon").child("notes").child("reminders").child(reminder).remove()
                         elif current_resin < 158:
                             embed = discord.Embed(title=f"Readjusting {uid_to_user}'s Reminder", description=f"{uid_to_user} asked to be reminded when their resin is almost capped, their resin should almost be capped now, but I checked again and it seems that they've used their resin again. Readjusting timer to check again in {resin_remaining_time}", color=3092790)

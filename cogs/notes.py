@@ -94,21 +94,30 @@ class notesClass(commands.Cog):
     async def on_error(self, error):
         print(error)
 
-    def get_rank(sorted_data, user):
+    def get_rank(sorted_data_oculi, sorted_data_chest, user):
         user_str = str(user)
-        rank = 1
-        for key in sorted_data.keys():
+        rank_oculi = 1
+        rank_chest = 1
+        for key in sorted_data_oculi.keys():
             if key == user_str:
                 break
-            rank += 1
-        return rank
+            rank_oculi += 1
+        for key in sorted_data_chest.keys():
+            if key == user_str:
+                break
+            rank_chest += 1
+        return {"oculi_rank": rank_oculi,
+                "chest_rank": rank_chest}
 
     def get_lb(user):
         data = database.child("boon").child("notes").child("lb").get().val()
-        sorted_data = OrderedDict(sorted(data.items(), key=lambda x: x[1]['total'], reverse=True))
-        rank = notesClass.get_rank(sorted_data = sorted_data, user = user)
+        sorted_data_oculi = OrderedDict(sorted(data.items(), key=lambda x: x[1]['total'], reverse=True))
+        sorted_data_chest = OrderedDict(sorted(data.items(), key=lambda x: x[1]['total_chest'], reverse=True))
+        rank = notesClass.get_rank(sorted_data_oculi = sorted_data_oculi, sorted_data_chest = sorted_data_chest, user = user)
         number_of_users = len(data)
-        return {"rank": rank, "users": number_of_users}
+        return {"oculi_rank": rank["oculi_rank"],
+                "chest_rank": rank["chest_rank"],
+                "users": number_of_users}
 
     @commands.command()
     async def n(self,ctx, alt=None):
@@ -123,7 +132,8 @@ class notesClass(commands.Cog):
                     uid = user["uid"]
                     name = ctx.author.name
                     ranking_data = notesClass.get_lb(user = ctx.author.id)
-                    oculi_rank = ranking_data["rank"]
+                    oculi_rank = ranking_data["oculi_rank"]
+                    chest_rank = ranking_data["chest_rank"]
                     oculi_lb_length = ranking_data["users"]
                     
                     reply = await ctx.reply("Fetching data...")
@@ -192,12 +202,8 @@ class notesClass(commands.Cog):
                     genshin_stats = await gc.get_genshin_user(uid)
                     embed.add_field(
                         name="Stats",
-                        value=f"**Days Active:** {genshin_stats.stats.days_active}\n**Characters:**{genshin_stats.stats.characters}\n<:anemoculus:1037646266185818152> {genshin_stats.stats.anemoculi} <:geoculus:1037646330895552552> {genshin_stats.stats.geoculi} <:electroculus:1037646373618733138> {genshin_stats.stats.electroculi} <:dendroculus:1037646414689345537> {genshin_stats.stats.dendroculi}\n<:common_chest:1037649653145030697> {genshin_stats.stats.common_chests} <:exquisite_chest:1037649650645217341> {genshin_stats.stats.exquisite_chests} <:precious_chest:1037649648602591362>  {genshin_stats.stats.precious_chests}\n<:Luxurious_chest:1037649646677401660>  {genshin_stats.stats.luxurious_chests} <:remarkable_chest:1037649644748029994> {genshin_stats.stats.remarkable_chests} <:waypoint:1037650848349683782> {genshin_stats.stats.unlocked_waypoints} <:domain:1037650846277709854> {genshin_stats.stats.unlocked_domains}\n**Oculus Ranking:** #{oculi_rank} out of {oculi_lb_length}",
+                        value=f"**Days Active:** {genshin_stats.stats.days_active}\n**Characters:**{genshin_stats.stats.characters}\n<:anemoculus:1037646266185818152> {genshin_stats.stats.anemoculi} <:geoculus:1037646330895552552> {genshin_stats.stats.geoculi} <:electroculus:1037646373618733138> {genshin_stats.stats.electroculi} <:dendroculus:1037646414689345537> {genshin_stats.stats.dendroculi}\n<:common_chest:1037649653145030697> {genshin_stats.stats.common_chests} <:exquisite_chest:1037649650645217341> {genshin_stats.stats.exquisite_chests} <:precious_chest:1037649648602591362>  {genshin_stats.stats.precious_chests}\n<:Luxurious_chest:1037649646677401660>  {genshin_stats.stats.luxurious_chests} <:remarkable_chest:1037649644748029994> {genshin_stats.stats.remarkable_chests} <:waypoint:1037650848349683782> {genshin_stats.stats.unlocked_waypoints} <:domain:1037650846277709854> {genshin_stats.stats.unlocked_domains}\n**Oculus Ranking:** #{oculi_rank} out of {oculi_lb_length}\n**Chest Ranking:** #{chest_rank} out of {oculi_lb_length}",
                         inline=True)
-                    embed.add_field(
-                        name="New!",
-                        value=f"Oculi Leaderboard Command: `.oclb`",
-                        inline=False)
                     
                     if not database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val():
                         if not database.child("boon").child("notes").child("reminders").child(ctx.author.id).get().val():
