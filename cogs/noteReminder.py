@@ -57,9 +57,11 @@ class resinReminder(commands.Cog):
         if all_reminders:
             for reminder in all_reminders:
                 try:
-                    channel_id = database.child("boon").child("notes").child("reminders").child(reminder).child("channel").get().val()
+                    data = database.child("boon").child("notes").child("reminders").child(reminder).get().val()
+                    channel_id = data["channel"]
                     channel = self.bot.get_channel(channel_id)
-                    remind_time = database.child("boon").child("notes").child("reminders").child(reminder).child("time").get().val()
+                    remind_time = data["time"]
+                    specific = data["specific"]
                     current_time = int(time.time())
 
                     if current_time >= remind_time:
@@ -78,18 +80,22 @@ class resinReminder(commands.Cog):
                         uid_to_user = str(uid_to_user)[:-5]
                         unix_resin = notes.remaining_resin_recovery_time.seconds
                         resin_remaining_time = format_timespan(unix_resin - 600, max_units=2)
-                        if current_resin >= 158:
-                            
-                            embed = discord.Embed(title=f"{uid_to_user}'s Resin Status", description=f"<:resin:950411358569136178> {current_resin}/{max_resin}", color=3092790)
+                        if not specific:
+                            if current_resin >= 158:
+                                
+                                embed = discord.Embed(title=f"{uid_to_user}'s Resin Status", description=f"<:resin:950411358569136178> {current_resin}/{max_resin}", color=3092790)
 
+                                await channel.send(f"<@{reminder}>! Your resin is almost capped!", embed=embed)
+                                database.child("boon").child("notes").child("reminders").child(reminder).remove()
+                            elif current_resin < 158:
+                                embed = discord.Embed(title=f"Readjusting {uid_to_user}'s Reminder", description=f"{uid_to_user} asked to be reminded when their resin is almost capped, their resin should almost be capped now, but I checked again and it seems that they've used their resin again. Readjusting timer to check again in {resin_remaining_time}", color=3092790)
+                                await channel.send(embed=embed)
+                                new_time = current_time + unix_resin - 600
+                                time_data = {"time": new_time}
+                                database.child("boon").child("notes").child("reminders").child(reminder).update(time_data)
+                        else:
+                            embed = discord.Embed(title=f"{uid_to_user}'s Resin Status", description=f"<:resin:950411358569136178> {current_resin}/{max_resin}", color=3092790)
                             await channel.send(f"<@{reminder}>! Resin alert", embed=embed)
-                            database.child("boon").child("notes").child("reminders").child(reminder).remove()
-                        elif current_resin < 158:
-                            embed = discord.Embed(title=f"Readjusting {uid_to_user}'s Reminder", description=f"{uid_to_user} asked to be reminded when their resin is almost capped, their resin should almost be capped now, but I checked again and it seems that they've used their resin again. Readjusting timer to check again in {resin_remaining_time}", color=3092790)
-                            await channel.send(embed=embed)
-                            new_time = current_time + unix_resin - 600
-                            time_data = {"time": new_time}
-                            database.child("boon").child("notes").child("reminders").child(reminder).update(time_data)
                 except Exception as e:
                     embed = discord.Embed(title="Error: Resin Reminder", description="An error has occurred. TofuBoy has been notified.", color=3092790)
                     error = discord.Embed(title="Error: Resin Reminder", description=f"Error message:\n```{e}```", color=3092790)

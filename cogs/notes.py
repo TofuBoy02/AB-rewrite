@@ -78,7 +78,7 @@ class buttonRemind(discord.ui.View):
             await interaction.message.edit(view=self)
             added_time = int(time.time()) + int(self.time) - 600
             human_time = format_timespan(num_seconds=self.time-600, max_units=2)
-            data = {"time": added_time, "channel": interaction.channel.id}
+            data = {"time": added_time, "channel": interaction.channel.id, "specific": False}
             database.child("boon").child("notes").child("reminders").child(interaction.user.id).update(data)
             await interaction.response.send_message(f"Okay, I'll check your resin in {human_time} and tell you if it's almost capped! You can still use you resin, and I'll readjust my timer accordingly~")
 

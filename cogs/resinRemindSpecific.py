@@ -80,7 +80,8 @@ class ResinRemindSpec(commands.Cog):
                 time_now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
                 reminder_time = time_now + seconds_left
                 data = {"channel": ctx.channel.id,
-                        "time": reminder_time}
+                        "time": reminder_time,
+                        "specific": True}
 
                 if database.child("boon").child("notes").child("reminders").child(ctx.author.id).get().val():
                     embed = discord.Embed(description="You already have a reminder, please clear it with </cancel reminder:1059393572878680066>", color=3092790)
