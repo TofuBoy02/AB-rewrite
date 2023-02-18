@@ -76,7 +76,25 @@ class oculiUpdate(commands.Cog):
             geoculus = genshin_stats.stats.geoculi
             electroculus = genshin_stats.stats.electroculi
             dendroculus = genshin_stats.stats.dendroculi
-            return [anemoculus, geoculus, electroculus, dendroculus]
+            common_chest = genshin_stats.stats.common_chests
+            exquisite_chest = genshin_stats.stats.exquisite_chests
+            precious_chest = genshin_stats.stats.precious_chests
+            luxurious_chest = genshin_stats.stats.luxurious_chests
+            remarkable_chest = genshin_stats.stats.remarkable_chests
+            achievements = genshin_stats.stats.achievements
+            # return [anemoculus, geoculus, electroculus, dendroculus]
+            return {"anemoculus": anemoculus,
+                    "geoculus": geoculus,
+                    "electroculus": electroculus,
+                    "dendroculus": dendroculus,
+                    "total_oculus": anemoculus + geoculus + electroculus + dendroculus,
+                    "common_chest": common_chest,
+                    "exquisite_chest": exquisite_chest,
+                    "precious_chest": precious_chest,
+                    "luxurious_chest": luxurious_chest,
+                    "remarkable_chest": remarkable_chest,
+                    "total_chest": common_chest + exquisite_chest + precious_chest + luxurious_chest + remarkable_chest,
+                    "achievements": achievements}
 
         for user in all_users: 
             try:
@@ -84,17 +102,24 @@ class oculiUpdate(commands.Cog):
                 ltuid = get_user_ltuid(id = user, data = all_users)
                 uid = get_user_uid(id = user, data = all_users)
                 user_stats = await get_user_stats(ltoken = ltoken, ltuid = ltuid, uid = uid)
-                data = {"anemoculi": user_stats[0],
-                        "geoculi": user_stats[1],
-                        "electroculi": user_stats[2],
-                        "dendroculi": user_stats[3],
-                        "total": sum(user_stats)}
+                data = {"anemoculi": user_stats["anemoculus"],
+                        "geoculi": user_stats['geoculus'],
+                        "electroculi": user_stats['electroculus'],
+                        "dendroculi": user_stats["dendroculus"],
+                        "total": user_stats["total_oculus"],
+                        "common_chest": user_stats["common_chest"],
+                        "exquisite_chest": user_stats["exquisite_chest"],
+                        "precious_chest": user_stats["precious_chest"],
+                        "luxurious_chest": user_stats["luxurious_chest"],
+                        "remarkable_chest": user_stats["remarkable_chest"],
+                        "total_chest": user_stats["total_chest"],
+                        "achievements": user_stats["achievements"]}
                 # print(user, data)
                 database.child("boon").child("notes").child("lb").child(user).update(data)
                 time.sleep(0.5)
                 print(f"{uid}")
-            except:
-                print("Invalid cookies")
+            except Exception as e:
+                print(e)
         
         
 
