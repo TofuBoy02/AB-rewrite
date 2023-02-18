@@ -17,7 +17,7 @@ bot = commands.Bot(command_prefix= ".", intents=intents, help_command=None, appl
 async def load():
     for filename in os.listdir('./cogs'):
         # if filename.endswith('gaclaim.py'):
-        if filename.endswith('Specific.py'):
+        if filename.endswith('.py'):
             await bot.load_extension(f'cogs.{filename[:-3]}')
 
 async def main():
