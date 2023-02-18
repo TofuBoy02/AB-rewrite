@@ -233,7 +233,13 @@ class notesClass(commands.Cog):
                         "geoculi": genshin_stats.stats.geoculi,
                         "electroculi": genshin_stats.stats.electroculi,
                         "dendroculi": genshin_stats.stats.dendroculi,
-                        "total": genshin_stats.stats.anemoculi + genshin_stats.stats.geoculi + genshin_stats.stats.electroculi + genshin_stats.stats.dendroculi}
+                        "total": genshin_stats.stats.anemoculi + genshin_stats.stats.geoculi + genshin_stats.stats.electroculi + genshin_stats.stats.dendroculi,
+                        "common_chest": genshin_stats.stats.common_chests,
+                        "exquisite_chest": genshin_stats.stats.exquisite_chests,
+                        "precious_chest": genshin_stats.stats.precious_chests,
+                        "luxurious_chest": genshin_stats.stats.luxurious_chests,
+                        "remarkable_chest": genshin_stats.stats.remarkable_chests,
+                        "total_chest": genshin_stats.stats.common_chests + genshin_stats.stats.exquisite_chests + genshin_stats.stats.precious_chests + genshin_stats.stats.luxurious_chests + genshin_stats.stats.remarkable_chests}
                 database.child("boon").child("notes").child("lb").child(ctx.author.id).update(data)
             except:
                 print("Could not update oculi data")
