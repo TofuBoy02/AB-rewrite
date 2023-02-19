@@ -197,8 +197,11 @@ class notesClass(commands.Cog):
                             value= f"**Username:** {output['playerInfo']['nickname']}\n<:signature:1036183906950590515> {signature}\n<:AR:1036183121760104448> **AR:** {output['playerInfo']['level']}\n<:WL:1036184269950820422> **World Level: ** {output['playerInfo']['worldLevel']}\n**Achievements:** {output['playerInfo']['finishAchievementNum']}\n<:abyss:1036184565422772305> {output['playerInfo']['towerFloorIndex']}-{output['playerInfo']['towerLevelIndex']}\n<:blank:1036569081345757224>",
                             inline=True)
                         embed.set_thumbnail(url=character_id_ui_url)
+
                     else:
                         pass
+                    embed.add_field(name="<:WL:1036184269950820422> **New!**", value="Set a reminder when your resin reaches a certain amount with `.rr <target amout>`")
+                    
                     genshin_stats = await gc.get_genshin_user(uid)
                     embed.add_field(
                         name="Stats",
