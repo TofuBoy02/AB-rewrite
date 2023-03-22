@@ -117,10 +117,40 @@ class oculiUpdate(commands.Cog):
                 # print(user, data)
                 database.child("boon").child("notes").child("lb").child(user).update(data)
                 time.sleep(0.5)
-                print(f"{uid}")
+                # print(f"{uid}")
             except Exception as e:
                 print(e)
         
+            try:
+                pt_data = database.child("boon").child("playtime").get().val()
+            
+                lb = {}
+
+                for user in pt_data:
+                    # print(user)
+                    try:
+                        username = await self.bot.fetch_user(user)
+                        username = str(username)[:-5]
+                    except:
+                        pass
+                    try:
+                        user_total = 0
+                        for year in pt_data[user]:
+                            if year == 'settings':
+                                pass
+                            else:
+                                for month in pt_data[user][year]:
+                                    for session in pt_data[user][year][month]:
+                                        user_total += int(pt_data[user][year][month][session]['Duration'])
+                        # print(f"{user}, {user_total}")
+                        if user_total != 0:
+                            lb.update({user: {'total':user_total, 'username': username}})
+                
+                    except:
+                        pass
+                database.child('boon').child('playtime').child('lb').update(lb)
+            except:
+                pass
         
 
     @oculi_update.before_loop

@@ -191,11 +191,12 @@ class gacha(commands.Cog):
 
         # ADD FOOTER IF CARD IS CLAIMED BY SOMEONE ELSE ALREADY
         if card_is_claimed:
+            print(f"Card is claimed. Rolled card is {final_rarity} {random_card_index}")
             owner: int = database.child("cards").child(f"{final_rarity}").child(
                 random_card_index).child("owned_by").get().val()
 
             # try:
-            uid_to_user = await self.bot.fetch_user(owner)
+            uid_to_user = await self.bot.fetch_user(int(owner))
             uid_to_user = str(uid_to_user)[:-5]
             
             # except:
@@ -225,7 +226,7 @@ class gacha(commands.Cog):
                         database.child("users").child(user.id).child("owned_cards").child(card_data['card_name']).update(claimed_card_data)
                         database.child("users").child(user.id).update({"claim_time": current_unix_added})
                         database.child("cards").child(f"{final_rarity}").child(random_card_index).update({"claimed": "true"})
-                        database.child("cards").child(f"{final_rarity}").child(random_card_index).update({"owned_by": user.id})
+                        database.child("cards").child(f"{final_rarity}").child(random_card_index).update({"owned_by": str(user.id)})
                         return
 
                     if card_is_claimed:
@@ -247,7 +248,7 @@ class gacha(commands.Cog):
                             database.child("users").child(user.id).child("owned_cards").child(card_data['card_name']).update(claimed_card_data)
                             database.child("users").child(user.id).update({"claim_time": current_unix_added})
                             database.child("cards").child(f"{final_rarity}").child(random_card_index).update({"claimed": "true"})
-                            database.child("cards").child(f"{final_rarity}").child(random_card_index).update({"owned_by": user.id})
+                            database.child("cards").child(f"{final_rarity}").child(random_card_index).update({"owned_by": str(user.id)})
                             database.child("users").child(user.id).update({"username": user.name})
                             return
 

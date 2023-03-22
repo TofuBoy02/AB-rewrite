@@ -8,5 +8,6 @@ genshin
 pytz
 translate
 requests
+enkanetwork.py
 # fuzzywuzzy
 # python-Levenshtein

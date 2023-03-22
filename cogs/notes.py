@@ -12,6 +12,7 @@ from urllib.request import Request, urlopen
 import time
 import json
 from collections import OrderedDict
+import sys
 
 TOKEN = os.getenv('TOKEN')
 
@@ -78,7 +79,7 @@ class buttonRemind(discord.ui.View):
             await interaction.message.edit(view=self)
             added_time = int(time.time()) + int(self.time) - 600
             human_time = format_timespan(num_seconds=self.time-600, max_units=2)
-            data = {"time": added_time, "channel": interaction.channel.id, "specific": False}
+            data = {"time": added_time, "channel": str(interaction.channel.id), "specific": False}
             database.child("boon").child("notes").child("reminders").child(interaction.user.id).update(data)
             await interaction.response.send_message(f"Okay, I'll check your resin in {human_time} and tell you if it's almost capped! You can still use you resin, and I'll readjust my timer accordingly~")
 
@@ -177,17 +178,21 @@ class notesClass(commands.Cog):
                         character_id_ui_front = character_id_ui.replace('Side_', '')
                         character_id_ui_url = f"https://enka.network/ui/{character_id_ui_front}.png"
                     except Exception as e:
-                        print(e)
+                        print(f'001 {e}')
                         output = None
-                        return
+                        
 
                     try:
                         signature = f"\"{output['playerInfo']['signature']}\""
-                    except:
-                        signature = "None"
-
+                    except Exception as e:
+                        print(f'0002 {e}')
+                        signature = None
+                    if output != None:
+                        player_name = output['playerInfo']['nickname']
+                    else:
+                        player_name = ctx.author.name
                     embed = discord.Embed(
-                        title=f"{output['playerInfo']['nickname']}'s Live Notes",
+                        title=f"{player_name}'s Live Notes",
                         color=ctx.author.color,
                         description=f"<:resin:950411358569136178> {notes.current_resin}/{notes.max_resin} \n **Time until capped:** {resin_remaining_time} \n<:transformer:967334141681090582> {transformer}\n<:Item_Realm_Currency:950601442740301894> {notes.current_realm_currency}/{notes.max_realm_currency} \n **Expeditions:** {len(notes.expeditions)}/{notes.max_expeditions} \n <:Icon_Commission:950603084701253642> {notes.completed_commissions}/4 \n **Claimed Guild Rewards:** {notes.claimed_commission_reward} \n **Remaining weekly boss discounts:** {notes.remaining_resin_discounts}\n<:blank:1036569081345757224>"
                     )
@@ -200,7 +205,7 @@ class notesClass(commands.Cog):
 
                     else:
                         pass
-                    embed.add_field(name="<:WL:1036184269950820422> **New!**", value="Set a reminder when your resin reaches a certain amount with `.rr <target amout>`")
+                    
                     
                     genshin_stats = await gc.get_genshin_user(uid)
                     embed.add_field(
@@ -233,7 +238,10 @@ class notesClass(commands.Cog):
                 elif not database.child("boon").child("notes").child("users").child(ctx.author.id).get().val():
                     await ctx.reply("Your Discord ID is not linked to a Boon notes account. Please register using </register:1056894402548736060>")
             except Exception as e:
-                print(e)
+                print(f'003 {e}')
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
                 await ctx.reply(f"An error occured. Please ping tofu.\n`{e}`")
 
             ##### Update oculi index #####
@@ -303,7 +311,7 @@ class notesClass(commands.Cog):
                         character_id_ui_front = character_id_ui.replace('Side_', '')
                         character_id_ui_url = f"https://enka.network/ui/{character_id_ui_front}.png"
                     except Exception as e:
-                        print(e)
+                        print(f'004 {e}')
                         output = None
 
                     try:
@@ -350,7 +358,7 @@ class notesClass(commands.Cog):
                     embed = discord.Embed()
                     await ctx.reply("This alt account is not found. You have no alt accounts registered.")
             except Exception as e:
-                print(e)
+                print(f'005 {e}')
                 await ctx.reply(f"An error occured. Please ping tofu.\n`{e}`")
 
 
@@ -397,6 +405,7 @@ class notesClass(commands.Cog):
                 await ctx.reply("Your Discord ID is not linked to a Boon notes account. Please register using </register:1056894402548736060>")
 
         except Exception as e:
+            print(f'006 {e}')
             await ctx.reply(f"An error occured. Please ping tofu.\n`{e}`")
         
 async def setup(bot):
