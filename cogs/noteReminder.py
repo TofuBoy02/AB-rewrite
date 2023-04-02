@@ -111,6 +111,7 @@ class resinReminder(commands.Cog):
                                 await channel.send(f"<@{reminder}>! Resin alert", embed=embed)
                                 database.child("boon").child("notes").child("reminders").child(reminder).remove()
                 except Exception as e:
+                    print(e)
                     embed = discord.Embed(title="Error: Resin Reminder", description="An error has occurred. TofuBoy has been notified.", color=3092790)
                     error = discord.Embed(title="Error: Resin Reminder", description=f"Error message:\n```{e}```", color=3092790)
                     await channel.send(embed)
