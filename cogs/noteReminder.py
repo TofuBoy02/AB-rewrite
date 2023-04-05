@@ -47,12 +47,12 @@ class resinReminder(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print("pulladd cog is online.")
+        print("noteReminder cog is online.")
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(minutes=5)
     async def resinReminderCheck(self):
         
-        print("looping through resin reminders")
+        print(f"looping through resin reminders. Current time: {int(time.time())}")
         all_reminders = database.child("boon").child("notes").child("reminders").shallow().get().val()
         if all_reminders:
             for reminder in all_reminders:

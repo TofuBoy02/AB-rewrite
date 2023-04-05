@@ -49,7 +49,7 @@ class pulladd(commands.Cog):
 
     @tasks.loop(minutes=10)
     async def loopadd(self):
-        print("looping")
+        print("looping pull add.")
         database.child("pull_refresh").child("unix").set(int(time.time()) + 600)
         all_users = database.child("users").shallow().get().val()
         # print(all_users)
