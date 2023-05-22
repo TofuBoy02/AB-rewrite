@@ -13,6 +13,8 @@ import time
 import json
 from collections import OrderedDict
 import sys
+import requests
+import ssl
 
 TOKEN = os.getenv('TOKEN')
 
@@ -43,6 +45,16 @@ config = {
     "serviceAccount": service
 
 } 
+
+element_emojis = {
+    "Rock": "<:geo:1108681874647285781>",
+    "Wind": "<:anemo:1108682012610531349>",
+    "Electric": "<:electro:1108682279284387871>",
+    "Grass": "<:dendro:1108682341695619154>",
+    "Water": "<:hydro:1108682390768992327>",
+    "Fire": "<:pyro:1108682468065824789>",
+    "Ice": "<:cryo:1108682516564561981>"
+}
 
 firebase = pyrebase.initialize_app(config)
 database = firebase.database()
@@ -109,6 +121,177 @@ class notesClass(commands.Cog):
             rank_chest += 1
         return {"oculi_rank": rank_oculi,
                 "chest_rank": rank_chest}
+    
+    def unix_to_years_months(unix_timestamp):
+        now = datetime.datetime.now()
+        timestamp = datetime.datetime.fromtimestamp(unix_timestamp)
+        delta = now - timestamp
+
+        years = delta.days // 365
+        months = (delta.days % 365) // 30
+
+        if years == 0:
+            if months == 0:
+                return 'less than a month ago'
+            elif months == 1:
+                return '1 month ago'
+            else:
+                return '{} months ago'.format(months)
+        elif years == 1:
+            if months == 0:
+                return '1 year ago'
+            elif months == 1:
+                return '1 year and 1 month ago'
+            else:
+                return '1 year and {} months ago'.format(months)
+        else:
+            if months == 0:
+                return '{} years ago'.format(years)
+            elif months == 1:
+                return '{} years and 1 month ago'.format(years)
+            else:
+                return '{} years and {} months ago'.format(years, months)
+    
+    def unix_days_ago(unix_timestamp):
+        now = datetime.datetime.now()
+        timestamp = datetime.datetime.fromtimestamp(unix_timestamp)
+        delta = now - timestamp
+
+        return delta.days
+    
+    def unix_to_date(unix_timestamp):
+        timestamp = datetime.datetime.fromtimestamp(unix_timestamp)
+        formatted_date = timestamp.strftime('%B %d, %Y')
+        return formatted_date
+    
+    def get_start_date(uid):
+        url = f'https://genshin.aza.gg/api/game/genshin/check-date-uid-static/u/{uid}'
+        headers = {
+            'authority': 'genshin.aza.gg',
+            'accept': '*/*',
+            'accept-language': 'en-GB,en;q=0.9,en-US;q=0.8',
+            'content-type': 'application/json',
+            'cookie': 'adfit_sdk_id=d56d62ae-d1f5-43e1-a1a4-d6eadff92de0; lang=en',
+            'origin': 'https://genshin.aza.gg',
+            'referer': f'https://genshin.aza.gg/uid/{uid}',
+            'sec-ch-ua': '"Not/A)Brand";v="99", "Microsoft Edge";v="115", "Chromium";v="115"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.0.0'
+        }
+        data = {}
+
+        response = requests.post(url, headers=headers, json=data)
+
+        return response.json()
+    
+    def get_akasha(uid):
+        url = f"https://akasha.cv/api/getCalculationsForUser/{uid}"
+
+        headers = {
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "en-GB,en;q=0.9,en-US;q=0.8",
+            "Connection": "keep-alive",
+            "Cookie": "connect.sid=s%3A7p_AT9cdA7-hBcREzKT9wZzpZMUhDmMM.TWKSIHvPK1Y2l1pnKT81KkhPmsmR%2BFMg3Y60u5s9HNc",
+            "If-None-Match": 'W/"a5d8-6a0G7Cws5554RTURi1zZpOiPOns"',
+            "Referer": "https://akasha.cv/profile/813180074",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.0.0",
+            "sec-ch-ua": '"Not/A)Brand";v="99", "Microsoft Edge";v="115", "Chromium";v="115"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"Windows"'
+        }
+        # ssl._create_default_https_context = ssl._create_unverified_context()
+
+        response = requests.get(url, headers=headers, timeout=3, verify='./cacert.pem')
+        # print(response.json())
+        return response.json()
+    
+    def extract_calculations(data):
+        calculations_list = []
+
+        for character_data in data['data']:
+            character_id = character_data['characterId']
+            character_name = character_data['name']
+            calculations = character_data['calculations']
+
+            character_calculations = []
+            for calculation_id, calculation in calculations.items():
+                calculation_info = {
+                    'calculationId': calculation_id,
+                    'ranking': calculation['ranking'],
+                    'outOf': calculation['outOf']
+                }
+
+                # Check if variant exists and use the display name instead of the short name
+                variant = calculation.get('variant')
+                if variant:
+                    calculation_info['name'] = variant['displayName']
+                else:
+                    calculation_info['name'] = calculation['short']
+
+                character_calculations.append(calculation_info)
+
+            character_info = {
+                'characterId': character_id,
+                'characterName': character_name,
+                'calculations': character_calculations
+            }
+
+            calculations_list.append(character_info)
+
+        return calculations_list
+
+    
+    def get_lowest_ranking(data):
+        result = []
+
+        for character_data in data:
+            character_name = character_data['characterName']
+            character_id = character_data['characterId']
+            calculations = character_data['calculations']
+
+            lowest_ranking_percentage = float('inf')
+            lowest_ranking_calculation = None
+
+            for calculation in calculations:
+                calculation_name = calculation['name']
+                ranking = calculation['ranking']
+                out_of = calculation['outOf']
+
+                ranking_percentage = ranking / out_of
+
+                if ranking_percentage < lowest_ranking_percentage:
+                    lowest_ranking_percentage = ranking_percentage
+                    lowest_ranking_calculation = {
+                        'calculationName': calculation_name,
+                        'ranking': ranking,
+                        'outOf': out_of,
+                        'rankingPercentage': ranking_percentage
+                    }
+
+            character_info = {
+                'characterName': character_name,
+                'calculation': lowest_ranking_calculation,
+                'characterId': character_id
+            }
+
+            result.append(character_info)
+
+        return result
+    
+    def sort_akasha_ranking(data):
+        sorted_data = sorted(data, key=lambda x: x['calculation']['rankingPercentage'])
+        return sorted_data
+    
+    def format_percentage(value):
+        percentage = round(value * 100)
+        return "{}%".format(percentage)
 
     def get_lb(user):
         data = database.child("boon").child("notes").child("lb").get().val()
@@ -124,9 +307,8 @@ class notesClass(commands.Cog):
     async def n(self,ctx, alt=None):
         if alt is None:
             try:
-                print("test")
-                if database.child("boon").child("notes").child("users").child(ctx.author.id).get().val():
-                    user = database.child("boon").child("notes").child("users").child(ctx.author.id).get().val()
+                if user := database.child("boon").child("notes").child("users").child(ctx.author.id).get().val():
+                    # user = database.child("boon").child("notes").child("users").child(ctx.author.id).get().val()
                     ltuid = user["ltuid"]
                     ltoken = user["ltoken"]
                     gc = genshin.Client(f"ltoken={ltoken}; ltuid={ltuid}")
@@ -165,6 +347,18 @@ class notesClass(commands.Cog):
                         transformer = f"{format_timespan(transformer_recovery_time - current_time, max_units=2)}"
 
                     try:
+                        start_date = notesClass.get_start_date(uid)
+                        start_date_version = start_date['data']['version'].replace(';', '.')
+                        start_date_day = start_date['data']['version_date']
+                        start_date_unix = start_date['data']['unix_time']
+                        start_date_humanfriendly = notesClass.unix_to_years_months(start_date_unix)
+                        start_date_date = notesClass.unix_to_date(start_date_unix)
+                    except Exception as e:
+                        print(e)
+                        start_date = 0
+
+
+                    try:
                         
                         url = f"https://enka.network/api/uid/{uid}"
                         print(url)
@@ -199,19 +393,64 @@ class notesClass(commands.Cog):
                     if output != None:
                         embed.add_field(
                             name="<:paimon:1036568819646341180> Genshin Profile",
-                            value= f"**Username:** {output['playerInfo']['nickname']}\n<:signature:1036183906950590515> {signature}\n<:AR:1036183121760104448> **AR:** {output['playerInfo']['level']}\n<:WL:1036184269950820422> **World Level: ** {output['playerInfo']['worldLevel']}\n**Achievements:** {output['playerInfo']['finishAchievementNum']}\n<:abyss:1036184565422772305> {output['playerInfo']['towerFloorIndex']}-{output['playerInfo']['towerLevelIndex']}\n<:blank:1036569081345757224>",
+                            value= f"**Username:** {output['playerInfo']['nickname']}\n<:signature:1036183906950590515> {signature}\n<:AR:1036183121760104448> **AR:** {output['playerInfo']['level']}\n<:WL:1036184269950820422> **World Level: ** {output['playerInfo']['worldLevel']}\n**Achievements:** {output['playerInfo']['finishAchievementNum']}\n<:abyss:1036184565422772305> {output['playerInfo']['towerFloorIndex']}-{output['playerInfo']['towerLevelIndex']}\n**Started:** Version {start_date_version}, Day {start_date_day}\n{start_date_date}\n({start_date_humanfriendly})\n<:blank:1036569081345757224>",
                             inline=True)
                         embed.set_thumbnail(url=character_id_ui_url)
 
+                    
+
                     else:
                         pass
+
+                   
                     
                     
                     genshin_stats = await gc.get_genshin_user(uid)
                     embed.add_field(
                         name="Stats",
-                        value=f"**Days Active:** {genshin_stats.stats.days_active}\n**Characters:**{genshin_stats.stats.characters}\n<:anemoculus:1037646266185818152> {genshin_stats.stats.anemoculi} <:geoculus:1037646330895552552> {genshin_stats.stats.geoculi} <:electroculus:1037646373618733138> {genshin_stats.stats.electroculi} <:dendroculus:1037646414689345537> {genshin_stats.stats.dendroculi}\n<:common_chest:1037649653145030697> {genshin_stats.stats.common_chests} <:exquisite_chest:1037649650645217341> {genshin_stats.stats.exquisite_chests} <:precious_chest:1037649648602591362>  {genshin_stats.stats.precious_chests}\n<:Luxurious_chest:1037649646677401660>  {genshin_stats.stats.luxurious_chests} <:remarkable_chest:1037649644748029994> {genshin_stats.stats.remarkable_chests} <:waypoint:1037650848349683782> {genshin_stats.stats.unlocked_waypoints} <:domain:1037650846277709854> {genshin_stats.stats.unlocked_domains}\n**Oculus Ranking:** #{oculi_rank} out of {oculi_lb_length}\n**Chest Ranking:** #{chest_rank} out of {oculi_lb_length}",
+                        value=f"**Days Active:** {genshin_stats.stats.days_active}\n**Days Missed:** {notesClass.unix_days_ago(start_date_unix) - int(genshin_stats.stats.days_active)}\n**Characters:** {genshin_stats.stats.characters}\n<:anemoculus:1037646266185818152> {genshin_stats.stats.anemoculi} <:geoculus:1037646330895552552> {genshin_stats.stats.geoculi} <:electroculus:1037646373618733138> {genshin_stats.stats.electroculi} <:dendroculus:1037646414689345537> {genshin_stats.stats.dendroculi}\n<:common_chest:1037649653145030697> {genshin_stats.stats.common_chests} <:exquisite_chest:1037649650645217341> {genshin_stats.stats.exquisite_chests} <:precious_chest:1037649648602591362>  {genshin_stats.stats.precious_chests}\n<:Luxurious_chest:1037649646677401660>  {genshin_stats.stats.luxurious_chests} <:remarkable_chest:1037649644748029994> {genshin_stats.stats.remarkable_chests} <:waypoint:1037650848349683782> {genshin_stats.stats.unlocked_waypoints} <:domain:1037650846277709854> {genshin_stats.stats.unlocked_domains}\n**Oculus Ranking:** #{oculi_rank} out of {oculi_lb_length}\n**Chest Ranking:** #{chest_rank} out of {oculi_lb_length}",
                         inline=True)
+                    
+                    try:
+                        akasha_stats = notesClass.get_akasha(uid)
+                        extracted_akasha = notesClass.extract_calculations(akasha_stats)
+                        pretty_akasha = notesClass.get_lowest_ranking(extracted_akasha)
+                        sorted_pretty_akasha = notesClass.sort_akasha_ranking(pretty_akasha)
+                        f = open('./characters.json')
+                        characters_output = json.load(f)
+                        # print(pretty_akasha)
+                        akasha_description = ""
+                        if not akasha_stats['data']:
+                            embed.add_field(
+                            name="<:akasha:1108685838646263888> Akasha Ranking",
+                            value= f"Can't fetch data, please try to initiate your account on the website first",
+                            inline=False)
+                        else:
+                            for data in sorted_pretty_akasha:
+                                character_element_name = characters_output[str(data['characterId'])]['Element']
+                                character_element = element_emojis.get(character_element_name, "")
+                                character_name = data['characterName']
+                                calculation = data['calculation']
+                                calculation_name = calculation['calculationName']
+                                ranking_percentage = calculation['rankingPercentage']
+                                formatted_percentage =notesClass.format_percentage(ranking_percentage)
+                                akasha_description += f"\n{character_element}**{character_name} ({calculation_name})**: Top {formatted_percentage}"
+                            embed.add_field(
+                                name="<:akasha:1108685838646263888> Akasha Ranking",
+                                value= f"{akasha_description}",
+                                inline=False)
+                    except requests.Timeout:
+                        embed.add_field(
+                            name="<:akasha:1108685838646263888> Akasha Ranking",
+                            value= f"Akasha took too long to respond.",
+                            inline=False)
+
+                    except Exception as e:
+                        print(f"akasha error: {e}")
+                        embed.add_field(
+                            name="<:akasha:1108685838646263888> Akasha Ranking",
+                            value= f"Can't fetch data, please try to initiate your account on the website first.",
+                            inline=False)
                     
                     if not database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val():
                         if not database.child("boon").child("notes").child("reminders").child(ctx.author.id).get().val():
@@ -222,8 +461,8 @@ class notesClass(commands.Cog):
                         else:
                             await reply.edit(content="", embed=embed, view=removeRemind(author=ctx.author.id))
 
-                    elif database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val():
-                        user_settings = database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val()
+                    elif user_settings := database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val():
+                        # user_settings = database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val()
                         if user_settings["show_note_buttons"] == True:
                             if not database.child("boon").child("notes").child("reminders").child(ctx.author.id).get().val():
                                 if notes.remaining_resin_recovery_time.seconds > 600:
@@ -235,7 +474,8 @@ class notesClass(commands.Cog):
                         elif user_settings["show_note_buttons"] == False:
                             await reply.edit(content="", embed=embed)
 
-                elif not database.child("boon").child("notes").child("users").child(ctx.author.id).get().val():
+                # elif not database.child("boon").child("notes").child("users").child(ctx.author.id).get().val():
+                else:
                     await ctx.reply("Your Discord ID is not linked to a Boon notes account. Please register using </register:1056894402548736060>")
             except Exception as e:
                 print(f'003 {e}')

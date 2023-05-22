@@ -61,6 +61,7 @@ class gaclaim(commands.Cog):
                     ltuid = user_data["ltuid"]
                     uid = user_data["uid"]
                     gc = genshin.Client({"ltuid": ltuid, "ltoken": ltoken})
+                    
                     gc.default_game = genshin.Game.GENSHIN
                     try:
                         reward = await gc.claim_daily_reward()
