@@ -9,5 +9,6 @@ pytz
 translate
 requests
 enkanetwork.py
+pydantic==1.10.7
 # fuzzywuzzy
 # python-Levenshtein
