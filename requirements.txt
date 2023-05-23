@@ -1,6 +1,6 @@
 PyJWT
 discord.py==2.1.0
-pyrebase4
+pyrebase
 python-dotenv
 humanfriendly
 # requests
