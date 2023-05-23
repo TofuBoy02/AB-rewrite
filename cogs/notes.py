@@ -188,29 +188,29 @@ class notesClass(commands.Cog):
 
         return response.json()
     
-    def get_akasha(uid):
-        url = f"https://akasha.cv/api/getCalculationsForUser/{uid}"
+    # def get_akasha(uid):
+    #     url = f"https://akasha.cv/api/getCalculationsForUser/{uid}"
 
-        headers = {
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "en-GB,en;q=0.9,en-US;q=0.8",
-            "Connection": "keep-alive",
-            "Cookie": "connect.sid=s%3A7p_AT9cdA7-hBcREzKT9wZzpZMUhDmMM.TWKSIHvPK1Y2l1pnKT81KkhPmsmR%2BFMg3Y60u5s9HNc",
-            "If-None-Match": 'W/"a5d8-6a0G7Cws5554RTURi1zZpOiPOns"',
-            "Referer": "https://akasha.cv/profile/813180074",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.0.0",
-            "sec-ch-ua": '"Not/A)Brand";v="99", "Microsoft Edge";v="115", "Chromium";v="115"',
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": '"Windows"'
-        }
-        # ssl._create_default_https_context = ssl._create_unverified_context()
+    #     headers = {
+    #         "Accept": "application/json, text/plain, */*",
+    #         "Accept-Language": "en-GB,en;q=0.9,en-US;q=0.8",
+    #         "Connection": "keep-alive",
+    #         "Cookie": "connect.sid=s%3A7p_AT9cdA7-hBcREzKT9wZzpZMUhDmMM.TWKSIHvPK1Y2l1pnKT81KkhPmsmR%2BFMg3Y60u5s9HNc",
+    #         "If-None-Match": 'W/"a5d8-6a0G7Cws5554RTURi1zZpOiPOns"',
+    #         "Referer": "https://akasha.cv/profile/813180074",
+    #         "Sec-Fetch-Dest": "empty",
+    #         "Sec-Fetch-Mode": "cors",
+    #         "Sec-Fetch-Site": "same-origin",
+    #         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.0.0",
+    #         "sec-ch-ua": '"Not/A)Brand";v="99", "Microsoft Edge";v="115", "Chromium";v="115"',
+    #         "sec-ch-ua-mobile": "?0",
+    #         "sec-ch-ua-platform": '"Windows"'
+    #     }
+    #     # ssl._create_default_https_context = ssl._create_unverified_context()
 
-        response = requests.get(url, headers=headers, timeout=3, verify='./cacert.pem')
-        # print(response.json())
-        return response.json()
+    #     response = requests.get(url, headers=headers, timeout=3, verify='./cacert.pem')
+    #     # print(response.json())
+    #     return response.json()
     
     def extract_calculations(data):
         calculations_list = []
@@ -411,46 +411,46 @@ class notesClass(commands.Cog):
                         value=f"**Days Active:** {genshin_stats.stats.days_active}\n**Days Missed:** {notesClass.unix_days_ago(start_date_unix) - int(genshin_stats.stats.days_active)}\n**Characters:** {genshin_stats.stats.characters}\n<:anemoculus:1037646266185818152> {genshin_stats.stats.anemoculi} <:geoculus:1037646330895552552> {genshin_stats.stats.geoculi} <:electroculus:1037646373618733138> {genshin_stats.stats.electroculi} <:dendroculus:1037646414689345537> {genshin_stats.stats.dendroculi}\n<:common_chest:1037649653145030697> {genshin_stats.stats.common_chests} <:exquisite_chest:1037649650645217341> {genshin_stats.stats.exquisite_chests} <:precious_chest:1037649648602591362>  {genshin_stats.stats.precious_chests}\n<:Luxurious_chest:1037649646677401660>  {genshin_stats.stats.luxurious_chests} <:remarkable_chest:1037649644748029994> {genshin_stats.stats.remarkable_chests} <:waypoint:1037650848349683782> {genshin_stats.stats.unlocked_waypoints} <:domain:1037650846277709854> {genshin_stats.stats.unlocked_domains}\n**Oculus Ranking:** #{oculi_rank} out of {oculi_lb_length}\n**Chest Ranking:** #{chest_rank} out of {oculi_lb_length}",
                         inline=True)
                     
-                    try:
-                        akasha_stats = notesClass.get_akasha(uid)
-                        extracted_akasha = notesClass.extract_calculations(akasha_stats)
-                        pretty_akasha = notesClass.get_lowest_ranking(extracted_akasha)
-                        sorted_pretty_akasha = notesClass.sort_akasha_ranking(pretty_akasha)
-                        f = open('./characters.json')
-                        characters_output = json.load(f)
-                        # print(pretty_akasha)
-                        akasha_description = ""
-                        if not akasha_stats['data']:
-                            embed.add_field(
-                            name="<:akasha:1108685838646263888> Akasha Ranking",
-                            value= f"Can't fetch data, please try to initiate your account on the website first",
-                            inline=False)
-                        else:
-                            for data in sorted_pretty_akasha:
-                                character_element_name = characters_output[str(data['characterId'])]['Element']
-                                character_element = element_emojis.get(character_element_name, "")
-                                character_name = data['characterName']
-                                calculation = data['calculation']
-                                calculation_name = calculation['calculationName']
-                                ranking_percentage = calculation['rankingPercentage']
-                                formatted_percentage =notesClass.format_percentage(ranking_percentage)
-                                akasha_description += f"\n{character_element}**{character_name} ({calculation_name})**: Top {formatted_percentage}"
-                            embed.add_field(
-                                name="<:akasha:1108685838646263888> Akasha Ranking",
-                                value= f"{akasha_description}",
-                                inline=False)
-                    except requests.Timeout:
-                        embed.add_field(
-                            name="<:akasha:1108685838646263888> Akasha Ranking",
-                            value= f"Akasha took too long to respond.",
-                            inline=False)
+                    # try:
+                    #     akasha_stats = notesClass.get_akasha(uid)
+                    #     extracted_akasha = notesClass.extract_calculations(akasha_stats)
+                    #     pretty_akasha = notesClass.get_lowest_ranking(extracted_akasha)
+                    #     sorted_pretty_akasha = notesClass.sort_akasha_ranking(pretty_akasha)
+                    #     f = open('./characters.json')
+                    #     characters_output = json.load(f)
+                    #     # print(pretty_akasha)
+                    #     akasha_description = ""
+                    #     if not akasha_stats['data']:
+                    #         embed.add_field(
+                    #         name="<:akasha:1108685838646263888> Akasha Ranking",
+                    #         value= f"Can't fetch data, please try to initiate your account on the website first",
+                    #         inline=False)
+                    #     else:
+                    #         for data in sorted_pretty_akasha:
+                    #             character_element_name = characters_output[str(data['characterId'])]['Element']
+                    #             character_element = element_emojis.get(character_element_name, "")
+                    #             character_name = data['characterName']
+                    #             calculation = data['calculation']
+                    #             calculation_name = calculation['calculationName']
+                    #             ranking_percentage = calculation['rankingPercentage']
+                    #             formatted_percentage =notesClass.format_percentage(ranking_percentage)
+                    #             akasha_description += f"\n{character_element}**{character_name} ({calculation_name})**: Top {formatted_percentage}"
+                    #         embed.add_field(
+                    #             name="<:akasha:1108685838646263888> Akasha Ranking",
+                    #             value= f"{akasha_description}",
+                    #             inline=False)
+                    # except requests.Timeout:
+                    #     embed.add_field(
+                    #         name="<:akasha:1108685838646263888> Akasha Ranking",
+                    #         value= f"Akasha took too long to respond.",
+                    #         inline=False)
 
-                    except Exception as e:
-                        print(f"akasha error: {e}")
-                        embed.add_field(
-                            name="<:akasha:1108685838646263888> Akasha Ranking",
-                            value= f"Can't fetch data, please try to initiate your account on the website first.",
-                            inline=False)
+                    # except Exception as e:
+                    #     print(f"akasha error: {e}")
+                    #     embed.add_field(
+                    #         name="<:akasha:1108685838646263888> Akasha Ranking",
+                    #         value= f"Can't fetch data, please try to initiate your account on the website first.",
+                    #         inline=False)
                     
                     if not database.child("boon").child("notes").child("users").child(ctx.author.id).child("settings").get().val():
                         if not database.child("boon").child("notes").child("reminders").child(ctx.author.id).get().val():
