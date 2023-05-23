@@ -1,13 +1,13 @@
 PyJWT
 discord.py==2.1.0
-Pyrebase==3.0.27
-python-dotenv==0.19.2
+Pyrebase
+python-dotenv
 humanfriendly==10.0
-requests==2.28.2
+requests
 genshin==1.5.2
-pytz==2021.3
-translate==3.6.1
-enkanetwork.py==1.4.0
+pytz
+translate
+enkanetwork.py
 pydantic==1.10.7
 # fuzzywuzzy
 # python-Levenshtein
