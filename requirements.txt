@@ -1,5 +1,5 @@
 PyJWT
-discord.py
+discord.py==2.1.0
 pyrebase
 python-dotenv
 humanfriendly
