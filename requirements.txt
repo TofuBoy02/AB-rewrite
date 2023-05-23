@@ -1,12 +1,13 @@
 PyJWT
-discord.py==2.1.0
-pyrebase==3.0.27
+discord.py
+pyrebase
 python-dotenv
 humanfriendly
 requests
-genshin==1.5.2
+genshin
 pytz
 translate
+requests
 enkanetwork.py
 # fuzzywuzzy
 # python-Levenshtein
