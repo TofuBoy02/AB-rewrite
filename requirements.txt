@@ -1,5 +1,5 @@
 PyJWT
-discord.py
+discord.py==2.1.0
 pyrebase
 python-dotenv
 humanfriendly
@@ -12,3 +12,4 @@ enkanetwork.py
 pydantic==1.10.7
 # fuzzywuzzy
 # python-Levenshtein
+urllib3
