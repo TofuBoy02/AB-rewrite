@@ -3,11 +3,10 @@ discord.py==2.1.0
 pyrebase4
 python-dotenv
 humanfriendly
-requests
+# requests
 genshin
 pytz
 translate
-requests
 enkanetwork.py
 pydantic==1.10.7
 # fuzzywuzzy
